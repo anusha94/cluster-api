@@ -87,6 +87,10 @@ CONTROLLER_IMG ?= $(REGISTRY)/$(IMAGE_NAME)
 KUBEADM_BOOTSTRAP_IMAGE_NAME ?= kubeadm-bootstrap-controller
 KUBEADM_BOOTSTRAP_CONTROLLER_IMG ?= $(REGISTRY)/$(KUBEADM_BOOTSTRAP_IMAGE_NAME)
 
+# byoh
+CAPI_BYOH_IMAGE_NAME ?= cluster-api-provider-byoh-controller
+CAPI_BYOH_CONTROLLER_IMG ?= $(REGISTRY)/$(CAPI_BYOH_IMAGE_NAME)
+
 # control plane
 KUBEADM_CONTROL_PLANE_IMAGE_NAME ?= kubeadm-control-plane-controller
 KUBEADM_CONTROL_PLANE_CONTROLLER_IMG ?= $(REGISTRY)/$(KUBEADM_CONTROL_PLANE_IMAGE_NAME)
@@ -403,6 +407,10 @@ docker-build-kubeadm-control-plane: ## Build the docker image for kubeadm contro
 	DOCKER_BUILDKIT=1 docker build --build-arg goproxy=$(GOPROXY) --build-arg ARCH=$(ARCH) --build-arg package=./controlplane/kubeadm --build-arg ldflags="$(LDFLAGS)" . -t $(KUBEADM_CONTROL_PLANE_CONTROLLER_IMG)-$(ARCH):$(TAG)
 	$(MAKE) set-manifest-image MANIFEST_IMG=$(KUBEADM_CONTROL_PLANE_CONTROLLER_IMG)-$(ARCH) MANIFEST_TAG=$(TAG) TARGET_RESOURCE="./controlplane/kubeadm/config/default/manager_image_patch.yaml"
 	$(MAKE) set-manifest-pull-policy TARGET_RESOURCE="./controlplane/kubeadm/config/default/manager_pull_policy.yaml"
+
+.PHONY: docker-build-cluster-api-provider-byoh
+docker-build-cluster-api-provider-byoh: ## Build the docker image for kubeadm control plane controller manager
+	DOCKER_BUILDKIT=1 docker build --build-arg goproxy=$(GOPROXY) --build-arg ARCH=$(ARCH) --build-arg package=../cluster-api-provider-byoh --build-arg ldflags="$(LDFLAGS)" . -t $(CAPI_BYOH_CONTROLLER_IMG)-$(ARCH):$(TAG)
 
 .PHONY: docker-push
 docker-push: ## Push the docker images

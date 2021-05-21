@@ -69,7 +69,7 @@ func QuickStartSpec(ctx context.Context, inputGetter func() QuickStartSpecInput)
 		clusterResources = new(clusterctl.ApplyClusterTemplateAndWaitResult)
 	})
 
-	It("Should create a workload cluster", func() {
+	FIt("Should create a workload cluster", func() {
 		By("Creating a workload cluster")
 
 		flavor := clusterctl.DefaultFlavor

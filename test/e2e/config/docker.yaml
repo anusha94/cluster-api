@@ -17,6 +17,8 @@ images:
   loadBehavior: tryLoad
 - name: gcr.io/k8s-staging-cluster-api/capd-manager-amd64:dev
   loadBehavior: tryLoad
+- name: gcr.io/k8s-staging-cluster-api/capb-manager:e2e
+  loadBehavior: tryLoad
 - name: quay.io/jetstack/cert-manager-cainjector:v1.1.0
   loadBehavior: tryLoad
 - name: quay.io/jetstack/cert-manager-webhook:v1.1.0
@@ -107,6 +109,23 @@ providers:
     - sourcePath: "../data/infrastructure-docker/v1alpha4/cluster-template-ipv6.yaml"
     - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
 
+- name: byoh
+  type: InfrastructureProvider
+  versions:
+  - name: v0.3.0
+    # Use manifest from source files
+    value: ../../../../cluster-api-provider-byoh/config/default
+    type: kustomize
+    replacements:
+      - old: gcr.io/k8s-staging-cluster-api/capb-manager:latest
+        new: gcr.io/k8s-staging-cluster-api/capb-manager:e2e
+      - old: "imagePullPolicy: Always"
+        new: "imagePullPolicy: IfNotPresent"
+
+    files:
+      # Add a cluster template
+      - sourcePath: "../../../test/e2e/data/infrastructure-byoh/v1alpha3/cluster-template.yaml"
+      - sourcePath: "../../../test/e2e/data/metadata.yaml"
 variables:
   # default variables for the e2e test; those values could be overridden via env variables, thus
   # allowing the same e2e config file to be re-used in different prow jobs e.g. each one with a K8s version permutation

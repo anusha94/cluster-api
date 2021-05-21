@@ -84,6 +84,7 @@ func (i Image) String() string {
 
 // ModifyImageRepository takes an imageName (e.g., repository/image:tag), and returns an image name with updated repository.
 func ModifyImageRepository(imageName, repositoryName string) (string, error) {
+	fmt.Println(imageName, ":::",repositoryName)
 	image, err := ImageFromString(imageName)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to parse image name")
