@@ -19,6 +19,8 @@ package e2e
 import (
 	"context"
 	"fmt"
+	infrastructurev1alpha4 "github.com/vmware-tanzu/cluster-api-provider-byoh/api/v1alpha4"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path/filepath"
 
@@ -30,7 +32,6 @@ import (
 
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
-	"sigs.k8s.io/cluster-api/util"
 )
 
 // QuickStartSpecInput is the input for QuickStartSpec.
@@ -77,24 +78,79 @@ func QuickStartSpec(ctx context.Context, inputGetter func() QuickStartSpecInput)
 			flavor = "ipv6"
 		}
 
+		clusterName := fmt.Sprintf("%s-%s", specName, "happybdayanusha")
+		//clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
+		//	ClusterProxy: input.BootstrapClusterProxy,
+		//	ConfigCluster: clusterctl.ConfigClusterInput{
+		//		LogFolder:                filepath.Join(input.ArtifactFolder, "clusters", input.BootstrapClusterProxy.GetName()),
+		//		ClusterctlConfigPath:     input.ClusterctlConfigPath,
+		//		KubeconfigPath:           input.BootstrapClusterProxy.GetKubeconfigPath(),
+		//		InfrastructureProvider:   "docker:v0.4.99",
+		//		Flavor:                   flavor,
+		//		Namespace:                namespace.Name,
+		//		ClusterName:              clusterName,
+		//		KubernetesVersion:        input.E2EConfig.GetVariable(KubernetesVersion),
+		//		ControlPlaneMachineCount: pointer.Int64Ptr(1),
+		//		WorkerMachineCount:       pointer.Int64Ptr(0),
+		//	},
+		//	WaitForClusterIntervals:      input.E2EConfig.GetIntervals(specName, "wait-cluster"),
+		//	WaitForControlPlaneIntervals: input.E2EConfig.GetIntervals(specName, "wait-control-plane"),
+		//}, clusterResources)
+
+		By("create a ByoHost")
+		ByoHost := &infrastructurev1alpha4.ByoHost{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ByoHost",
+				APIVersion: "infrastructure.cluster.x-k8s.io/v1alpha4",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "jaime.com",
+				Namespace: namespace.Name,
+			},
+			Spec: infrastructurev1alpha4.ByoHostSpec{
+				Foo: "Baz",
+			},
+		}
+		client := input.BootstrapClusterProxy.GetClient()
+		Expect(client.Create(ctx, ByoHost)).Should(Succeed())
+
 		clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
 			ClusterProxy: input.BootstrapClusterProxy,
 			ConfigCluster: clusterctl.ConfigClusterInput{
 				LogFolder:                filepath.Join(input.ArtifactFolder, "clusters", input.BootstrapClusterProxy.GetName()),
 				ClusterctlConfigPath:     input.ClusterctlConfigPath,
 				KubeconfigPath:           input.BootstrapClusterProxy.GetKubeconfigPath(),
-				InfrastructureProvider:   clusterctl.DefaultInfrastructureProvider,
+				InfrastructureProvider:   "byoh:v0.4.0",
 				Flavor:                   flavor,
 				Namespace:                namespace.Name,
-				ClusterName:              fmt.Sprintf("%s-%s", specName, util.RandomString(6)),
+				ClusterName:              clusterName,
 				KubernetesVersion:        input.E2EConfig.GetVariable(KubernetesVersion),
 				ControlPlaneMachineCount: pointer.Int64Ptr(1),
 				WorkerMachineCount:       pointer.Int64Ptr(1),
 			},
 			WaitForClusterIntervals:      input.E2EConfig.GetIntervals(specName, "wait-cluster"),
 			WaitForControlPlaneIntervals: input.E2EConfig.GetIntervals(specName, "wait-control-plane"),
-			WaitForMachineDeployments:    input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
+			WaitForMachineDeployments: input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
 		}, clusterResources)
+
+		//
+		//clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
+		//	ClusterProxy: input.BootstrapClusterProxy,
+		//	ConfigCluster: clusterctl.ConfigClusterInput{
+		//		LogFolder:                filepath.Join(input.ArtifactFolder, "clusters", input.BootstrapClusterProxy.GetName()),
+		//		ClusterctlConfigPath:     input.ClusterctlConfigPath,
+		//		KubeconfigPath:           input.BootstrapClusterProxy.GetKubeconfigPath(),
+		//		InfrastructureProvider:   "byoh:v0.4.0",
+		//		Flavor:                   flavor,
+		//		Namespace:                namespace.Name,
+		//		ClusterName:              fmt.Sprintf("%s-%s", specName, util.RandomString(6)),
+		//		KubernetesVersion:        input.E2EConfig.GetVariable(KubernetesVersion),
+		//		ControlPlaneMachineCount: pointer.Int64Ptr(0),
+		//		WorkerMachineCount:       pointer.Int64Ptr(1),
+		//	},
+		//	WaitForClusterIntervals:      input.E2EConfig.GetIntervals(specName, "wait-cluster"),
+		//	WaitForControlPlaneIntervals: input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
+		//}, clusterResources)
 
 		By("PASSED!")
 	})

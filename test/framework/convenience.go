@@ -17,6 +17,7 @@ limitations under the License.
 package framework
 
 import (
+	infrastructurev1alpha4 "github.com/vmware-tanzu/cluster-api-provider-byoh/api/v1alpha4"
 	"reflect"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -69,6 +70,8 @@ func TryAddDefaultSchemes(scheme *runtime.Scheme) {
 
 	// Add rbac to the scheme.
 	_ = rbacv1.AddToScheme(scheme)
+
+	_ = infrastructurev1alpha4.AddToScheme(scheme)
 }
 
 // ObjectToKind returns the Kind without the package prefix. Pass in a pointer to a struct

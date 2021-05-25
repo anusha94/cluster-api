@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"sigs.k8s.io/cluster-api/util"
 
 	"github.com/blang/semver"
 	. "github.com/onsi/ginkgo"
@@ -28,7 +29,6 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	"sigs.k8s.io/cluster-api/test/framework"
-	"sigs.k8s.io/cluster-api/util"
 )
 
 // Test suite constants for e2e config variables.
