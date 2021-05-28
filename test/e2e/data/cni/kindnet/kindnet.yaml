@@ -67,7 +67,7 @@ spec:
       serviceAccountName: kindnet
       containers:
         - name: kindnet-cni
-          image: kindest/kindnetd:0.5.4
+          image: kindest/kindnetd:v20200725-4d6bea59
           env:
             - name: HOST_IP
               valueFrom:

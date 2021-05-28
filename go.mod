@@ -2,7 +2,7 @@ module sigs.k8s.io/cluster-api
 
 go 1.16
 
-replace github.com/vmware-tanzu/cluster-api-provider-byoh => /Users/anushah/Documents/byoh/cluster-api-provider-byoh/
+replace github.com/vmware-tanzu/cluster-api-provider-byoh => /home/kokoni/cluster-api-provider-byoh
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
