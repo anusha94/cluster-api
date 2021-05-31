@@ -262,13 +262,8 @@ func ApplyClusterTemplateAndWait(ctx context.Context, input ApplyClusterTemplate
 		ControlPlane: result.ControlPlane,
 	}, input.WaitForControlPlaneIntervals...)
 
-	log.Logf("Waiting for the machine deployments to be provisioned")
-	result.MachineDeployments = framework.DiscoveryAndWaitForMachineDeployments(ctx, framework.DiscoveryAndWaitForMachineDeploymentsInput{
-		Lister:  input.ClusterProxy.GetClient(),
-		Cluster: result.Cluster,
-	}, input.WaitForMachineDeployments...)
-
 	log.Logf("Waiting for the machine pools to be provisioned")
+
 	result.MachinePools = framework.DiscoveryAndWaitForMachinePools(ctx, framework.DiscoveryAndWaitForMachinePoolsInput{
 		Getter:  input.ClusterProxy.GetClient(),
 		Lister:  input.ClusterProxy.GetClient(),

@@ -19,19 +19,21 @@ package e2e
 import (
 	"context"
 	"fmt"
-	infrastructurev1alpha4 "github.com/vmware-tanzu/cluster-api-provider-byoh/api/v1alpha4"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path/filepath"
+
+	infrastructurev1alpha4 "github.com/vmware-tanzu/cluster-api-provider-byoh/api/v1alpha4"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
-
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
+	"sigs.k8s.io/cluster-api/util"
 )
 
 // QuickStartSpecInput is the input for QuickStartSpec.
@@ -78,7 +80,7 @@ func QuickStartSpec(ctx context.Context, inputGetter func() QuickStartSpecInput)
 			flavor = "ipv6"
 		}
 
-		clusterName := fmt.Sprintf("%s-%s", specName, "happybdayanusha")
+		clusterName := fmt.Sprintf("%s-%s", specName, util.RandomString(6))
 		//clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
 		//	ClusterProxy: input.BootstrapClusterProxy,
 		//	ConfigCluster: clusterctl.ConfigClusterInput{
@@ -130,8 +132,19 @@ func QuickStartSpec(ctx context.Context, inputGetter func() QuickStartSpecInput)
 			},
 			WaitForClusterIntervals:      input.E2EConfig.GetIntervals(specName, "wait-cluster"),
 			WaitForControlPlaneIntervals: input.E2EConfig.GetIntervals(specName, "wait-control-plane"),
-			WaitForMachineDeployments: input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
+			WaitForMachineDeployments:    input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
 		}, clusterResources)
+
+		ByoHostLookupKey := types.NamespacedName{Name: "jaime.com", Namespace: namespace.Name}
+
+		Eventually(func() *corev1.ObjectReference {
+			createdByoHost := &infrastructurev1alpha4.ByoHost{}
+			err := client.Get(ctx, ByoHostLookupKey, createdByoHost)
+			if err != nil {
+				return nil
+			}
+			return createdByoHost.Status.MachineRef
+		}).ShouldNot(BeNil())
 
 		//
 		//clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
